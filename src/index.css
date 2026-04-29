@@ -1,0 +1,173 @@
+/* ── FONTS ── */
+/* Loaded via index.html <link> */
+
+/* ── CSS VARIABLES ── */
+:root {
+  /* Colors */
+  --ink:         #0a1628;
+  --ink-mid:     #112240;
+  --ink-soft:    #1e3a5f;
+  --gold:        #1a56db;
+  --gold-bright: #2563eb;
+  --gold-pale:   #bfdbfe;
+  --gold-glow:   rgba(37,99,235,0.18);
+  --teal:        #1d4ed8;
+  --teal-light:  #3b82f6;
+  --teal-glow:   rgba(29,78,216,0.15);
+  --cream:       #f0f6ff;
+  --white:       #ffffff;
+  --txt:         #0f172a;
+  --txt-soft:    #64748b;
+  --border:      rgba(37,99,235,0.18);
+  --border-light:rgba(37,99,235,0.1);
+
+  /* Status */
+  --ok:     #10b981;
+  --warn:   #f59e0b;
+  --danger: #ef4444;
+
+  /* Shadows */
+  --sh-sm: 0 2px 12px rgba(10,22,40,0.08);
+  --sh-md: 0 8px 40px rgba(10,22,40,0.14);
+  --sh-lg: 0 24px 80px rgba(10,22,40,0.2);
+
+  /* Typography */
+  --font-display: 'Cormorant Garamond', serif;
+  --font-body:    'Outfit', sans-serif;
+  --font-mono:    'DM Mono', monospace;
+
+  /* Layout */
+  --sidebar-w: 240px;
+  --topbar-h:  60px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+}
+
+/* ── RESET ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--ink);
+  color: var(--white);
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+input, select, textarea {
+  font-family: var(--font-body);
+}
+
+img, svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(37,99,235,0.25); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(37,99,235,0.4); }
+
+/* ── UTILITY CLASSES ── */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── PAGE BACKGROUND EFFECTS ── */
+.page-bg {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 70% 60% at 80% 20%, rgba(37,99,235,0.16) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 15% 80%, rgba(29,78,216,0.1) 0%, transparent 55%),
+    linear-gradient(150deg, #0a1628 0%, #0f2d57 60%, #0a1e40 100%);
+}
+
+.page-grid {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.page-grid::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ── TOAST ── */
+.toast-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  pointer-events: none;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.animate-fadeUp   { animation: fadeUp 0.5s ease both; }
+.animate-fadeIn   { animation: fadeIn 0.4s ease both; }
+.animate-spin     { animation: spin 0.8s linear infinite; }
