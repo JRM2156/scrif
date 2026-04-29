@@ -426,7 +426,24 @@ export default function Dashboard() {
     <>
       <style>{G}</style>
       <Topbar credits={profile?.credits} displayName={displayName} avatarUrl={avatarUrl} onToggle={()=>setSideOpen(o=>!o)} onSignOut={handleSignOut} />
-      <Sidebar open={sideOpen} active={active} onSelect={setActive} />
+      <Sidebar open={sideOpen} active={active} onSelect={(id) => {
+        setActive(id)
+        const serviceRoutes = {
+          'plagiarism': '/dashboard/plagiarism',
+          'ai-detect':  '/dashboard/ai-detection',
+          'formatting': '/dashboard/formatting',
+          'language':   '/dashboard/language',
+          'cover':      '/dashboard/cover-letter',
+          'rebuttal':   '/dashboard/rebuttal',
+          'compliance': '/dashboard/compliance',
+          'literature': '/dashboard/literature',
+          'package':    '/dashboard/full-package',
+          'manuscripts':'/dashboard/manuscripts',
+          'history':    '/dashboard/history',
+          'billing':    '/dashboard/billing',
+        }
+        if (serviceRoutes[id]) navigate(serviceRoutes[id])
+      }} />
 
       <main style={{marginLeft:sideOpen?232:0,marginTop:60,padding:'2rem',minHeight:'calc(100vh - 60px)',transition:'margin-left .25s ease',background:'linear-gradient(160deg,#0a1628 0%,#0d1f3c 60%,#0a1628 100%)'}}>
 
