@@ -129,7 +129,8 @@ export default function LanguageEditPage() {
       setStats(data.stats)
 
       const workingText = data.translated || text
-      if (docRef.current) docRef.current.innerHTML = buildHTML(workingText, allIssues)
+      const html = buildHTML(workingText, allIssues)
+      setDocHTML(html)
 
       showToast({title:'Analysis complete!', message:`${allIssues.length} suggestions found`, type:'success'})
 
@@ -288,12 +289,12 @@ export default function LanguageEditPage() {
 
           {docHTML && (
             <div style={{position:'relative'}}>
-              {/* Word-style document */}
               <div
                 ref={docRef}
                 contentEditable
                 suppressContentEditableWarning
                 onClick={onDocClick}
+                dangerouslySetInnerHTML={{__html: docHTML}}
                 style={{
                   outline:'none',
                   background:'#fff',
