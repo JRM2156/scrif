@@ -26,11 +26,10 @@ const INIT = {
   conflicts:'no', conflictDetails:'',
 }
 
-/* Always show placeholder text in grey if field is empty */
-function v(val, placeholder) {
-  return val
-    ? <span>{val}</span>
-    : <span style={{color:'#bbb',fontStyle:'italic'}}>{placeholder}</span>
+// Show value or grey placeholder
+function ph(val, placeholder) {
+  if (val) return val
+  return `<span style="color:#bbb;font-style:italic">${placeholder}</span>`
 }
 
 export default function CoverLetterPage() {
@@ -38,9 +37,82 @@ export default function CoverLetterPage() {
   const { showToast } = useToast()
   const [form, setForm] = useState(INIT)
   const [generating, setGenerating] = useState(false)
-  const letterRef = useRef(null)
 
   function set(k) { return e => setForm(f => ({...f, [k]: e.target.value})) }
+
+  // Build letter HTML string
+  function buildLetterHTML(forPrint = false) {
+    const grey = forPrint ? 'color:#999;font-style:italic' : 'color:#bbb;font-style:italic'
+    const p = (val, fallback) => val || `<span style="${grey}">${fallback}</span>`
+
+    const conflictText = form.conflicts === 'yes'
+      ? (form.conflictDetails
+          ? `The authors wish to disclose the following conflict of interest: ${form.conflictDetails}`
+          : 'The authors have conflicts of interest to disclose, details of which will be provided separately.')
+      : 'We have no conflicts of interest to disclose.'
+
+    const studyLabel = form.studyType === 'Review Article' ? 'a review article'
+      : form.studyType === 'Case Report' ? 'a case report'
+      : `an ${(form.studyType || 'original research').toLowerCase()}`
+
+    return `
+      <div style="text-align:right;margin-bottom:18px;padding-bottom:12px;border-bottom:1px solid #ccc">
+        <div style="font-size:13pt;font-weight:700;color:#111;margin-bottom:3px">${p(form.name,'[Your Name]')}</div>
+        <div style="font-size:10pt;color:#444;line-height:1.5">${p(form.affiliation,'[Your Affiliation]')}</div>
+        ${form.address ? `<div style="font-size:10pt;color:#444">${form.address}</div>` : `<div style="font-size:10pt;${grey}">[Your Address]</div>`}
+        <div style="font-size:10pt;color:#444">${p(form.email,'[Your Email]')}</div>
+      </div>
+
+      <div style="margin-bottom:16px;font-size:10.5pt;color:#333">${form.date}</div>
+
+      <div style="margin-bottom:16px;font-size:10.5pt;line-height:1.7">
+        <strong>Dear ${form.editorName || `<span style="${grey}">[Editor Name]</span>`},</strong><br/>
+        <em>${p(form.journal,'[Journal Name]')}</em>
+      </div>
+
+      <div style="font-weight:700;font-size:11pt;margin-bottom:16px;text-decoration:underline;text-underline-offset:3px">
+        Re: Submission of Manuscript — "${p(form.title,'[Manuscript Title]')}"
+      </div>
+
+      <p style="margin-bottom:12px;text-align:justify">
+        I/We wish to submit ${studyLabel} entitled <em>"${p(form.title,'[Manuscript Title]')}"</em> for consideration by <strong>${p(form.journal,'[Journal Name]')}</strong>.
+      </p>
+
+      <p style="margin-bottom:12px;text-align:justify">
+        I/We confirm that this work is original and has not been published elsewhere, nor is it currently under consideration for publication elsewhere.
+      </p>
+
+      <p style="margin-bottom:12px;text-align:justify">
+        In this paper, I/we ${p(form.reports,'[report on / show that ______]')}. This is significant because ${p(form.significance,'[______]')}.
+      </p>
+
+      <p style="margin-bottom:12px;text-align:justify">
+        We believe that this manuscript is appropriate for publication by <strong>${p(form.journal,'[Journal Name]')}</strong> because ${p(form.journalFit,'[specific reference to the journal\'s Aims & Scope ______]')}.
+      </p>
+
+      ${form.novelty
+        ? `<p style="margin-bottom:12px;text-align:justify">${form.novelty}</p>`
+        : `<p style="margin-bottom:12px;text-align:justify;${grey}">[Please explain in your own words the significance and novelty of the work, the problem that is being addressed, and why the manuscript belongs in this journal.]</p>`
+      }
+
+      <p style="margin-bottom:12px;text-align:justify">${conflictText}</p>
+
+      <p style="margin-bottom:12px;text-align:justify">
+        Please address all correspondence concerning this manuscript to me at <strong>${p(form.email,'[email address]')}</strong>.
+      </p>
+
+      <p style="margin-bottom:20px;text-align:justify">Thank you for your consideration of this manuscript.</p>
+
+      <div>
+        <p>Yours sincerely,</p>
+        <div style="margin-top:16px">
+          <div style="font-size:11.5pt;font-weight:700;color:#111">${p(form.name,'[Your Name]')}</div>
+          ${form.affiliation ? `<div style="font-size:10pt;color:#444;margin-top:2px">${form.affiliation}</div>` : ''}
+          ${form.email ? `<div style="font-size:10pt;color:#555;margin-top:1px">${form.email}</div>` : ''}
+        </div>
+      </div>
+    `
+  }
 
   async function aiGenerate() {
     if (!form.title && !form.reports) { showToast({title:'Fill title or study summary first', type:'warning'}); return }
@@ -66,49 +138,22 @@ export default function CoverLetterPage() {
   }
 
   function downloadPDF() {
-    const content = letterRef.current?.innerHTML || ''
     const win = window.open('', '_blank')
     win.document.write(`<!DOCTYPE html><html><head><title>Cover Letter</title>
     <style>
       *{box-sizing:border-box;margin:0;padding:0}
-      @page{size:A4;margin:18mm 20mm}
-      body{font-family:'Garamond','Georgia','Times New Roman',serif;font-size:11pt;line-height:1.65;color:#1a1a1a;background:#fff}
-      .sender{text-align:right;margin-bottom:18pt;padding-bottom:10pt;border-bottom:1px solid #ccc}
-      .sender-name{font-size:13pt;font-weight:700;color:#111;margin-bottom:3pt}
-      .sender-sub{font-size:10pt;color:#444;line-height:1.5}
-      .date{margin-bottom:14pt;font-size:10.5pt;color:#333}
-      .recipient{margin-bottom:14pt;font-size:10.5pt;line-height:1.6}
-      .subject{font-weight:700;font-size:11pt;margin-bottom:14pt;text-decoration:underline;text-underline-offset:3px}
-      .body p{margin-bottom:11pt;text-align:justify}
-      .closing{margin-top:14pt}
-      .sig{margin-top:22pt}
-      .sig-name{font-size:11.5pt;font-weight:700;color:#111}
-      .sig-sub{font-size:10pt;color:#444;margin-top:2pt}
-      span.ph{color:#aaa;font-style:italic}
-    </style></head><body>${content}
-    <script>window.onload=()=>{window.print()}<\/script>
+      @page{size:A4 portrait;margin:20mm 22mm}
+      html,body{width:100%;margin:0;padding:0;background:#fff}
+      body{font-family:Garamond,Georgia,'Times New Roman',serif;font-size:11pt;line-height:1.65;color:#1a1a1a}
+      p{margin-bottom:11pt;text-align:justify}
+    </style></head><body>
+    ${buildLetterHTML(true)}
+    <script>window.onload=function(){window.print()}<\/script>
     </body></html>`)
     win.document.close()
   }
 
   const fi = { className:'fi' }
-  const ta = (rows) => ({ className:'fi', as:'textarea', style:{resize:'vertical',lineHeight:1.65}, rows })
-
-  /* Letter styles for preview */
-  const L = {
-    page:{ background:'#fff', width:'100%', maxWidth:680, margin:'0 auto', padding:'28px 36px', boxShadow:'0 4px 32px rgba(0,0,0,.22)', fontFamily:"Garamond,Georgia,'Times New Roman',serif", fontSize:'11pt', lineHeight:1.65, color:'#1a1a1a', minHeight:900 },
-    senderBox:{ textAlign:'right', marginBottom:20, paddingBottom:12, borderBottom:'1px solid #ccc' },
-    senderName:{ fontSize:'13pt', fontWeight:700, color:'#111', marginBottom:3, display:'block' },
-    senderSub:{ fontSize:'10pt', color:'#444', lineHeight:1.5, display:'block' },
-    date:{ marginBottom:14, fontSize:'10.5pt', color:'#333' },
-    recipient:{ marginBottom:14, fontSize:'10.5pt', lineHeight:1.6 },
-    subject:{ fontWeight:700, fontSize:'11pt', marginBottom:14, textDecoration:'underline', textUnderlineOffset:3, display:'block' },
-    p:{ marginBottom:11, textAlign:'justify' },
-    closing:{ marginTop:14 },
-    sig:{ marginTop:18 },
-    sigName:{ fontSize:'11.5pt', fontWeight:700, color:'#111', display:'block' },
-    sigSub:{ fontSize:'10pt', color:'#444', marginTop:2, display:'block' },
-  }
 
   return (
     <>
@@ -130,7 +175,6 @@ export default function CoverLetterPage() {
 
           {/* LEFT FORM */}
           <div style={{borderRight:'1px solid rgba(37,99,235,.15)', overflowY:'auto', padding:'1.1rem 1rem 2rem', background:'rgba(255,255,255,.01)'}}>
-
             <div style={{fontSize:'.68rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'.1em', color:'rgba(255,255,255,.22)', marginBottom:'.75rem'}}>Author Details</div>
             <div className="fg"><label className="fl">Full Name</label><input {...fi} placeholder="Dr. Jane Smith" value={form.name} onChange={set('name')}/></div>
             <div className="fg"><label className="fl">Affiliation</label><input {...fi} placeholder="Harvard Medical School" value={form.affiliation} onChange={set('affiliation')}/></div>
@@ -153,7 +197,6 @@ export default function CoverLetterPage() {
             <div style={{height:1, background:'rgba(37,99,235,.12)', margin:'.9rem 0'}}/>
             <div style={{fontSize:'.68rem', fontWeight:700, textTransform:'uppercase', letterSpacing:'.1em', color:'rgba(255,255,255,.22)', marginBottom:'.3rem'}}>Letter Content</div>
             <div style={{fontSize:'.7rem', color:'rgba(37,99,235,.7)', marginBottom:'.75rem'}}>Fill manually or click ✦ AI Generate</div>
-
             <div className="fg"><label className="fl">In this paper, we report / show that…</label><textarea className="fi" rows={3} style={{resize:'vertical',lineHeight:1.65}} placeholder="Your main finding or contribution" value={form.reports} onChange={set('reports')}/></div>
             <div className="fg"><label className="fl">This is significant because…</label><textarea className="fi" rows={3} style={{resize:'vertical',lineHeight:1.65}} placeholder="Why does this matter?" value={form.significance} onChange={set('significance')}/></div>
             <div className="fg"><label className="fl">Appropriate for this journal because…</label><textarea className="fi" rows={3} style={{resize:'vertical',lineHeight:1.65}} placeholder="How it fits the journal scope" value={form.journalFit} onChange={set('journalFit')}/></div>
@@ -162,7 +205,7 @@ export default function CoverLetterPage() {
             <div style={{height:1, background:'rgba(37,99,235,.12)', margin:'.9rem 0'}}/>
             <div className="fg">
               <label className="fl">Conflicts of Interest</label>
-              <div style={{display:'flex', gap:'.5rem', marginBottom: form.conflicts==='yes'?'.6rem':0}}>
+              <div style={{display:'flex', gap:'.5rem', marginBottom:form.conflicts==='yes'?'.6rem':0}}>
                 {['no','yes'].map(v2=>(
                   <button key={v2} onClick={()=>setForm(f=>({...f,conflicts:v2}))} style={{flex:1, padding:'.5rem', background:form.conflicts===v2?'rgba(37,99,235,.3)':'rgba(255,255,255,.04)', border:`1px solid ${form.conflicts===v2?'rgba(37,99,235,.55)':'rgba(37,99,235,.18)'}`, borderRadius:7, color:form.conflicts===v2?'#fff':'rgba(255,255,255,.4)', fontSize:'.8rem', fontWeight:form.conflicts===v2?600:400, cursor:'pointer', fontFamily:"'Outfit',sans-serif"}}>
                     {v2==='no'?'✓ None':'⚠ Yes, disclose'}
@@ -174,90 +217,18 @@ export default function CoverLetterPage() {
           </div>
 
           {/* RIGHT - PREVIEW */}
-          <div style={{overflowY:'auto', background:'#525659', padding:'24px 20px', display:'flex', flexDirection:'column', alignItems:'center', gap:16}}>
-
-            {/* Toolbar */}
-            <div style={{width:'100%', maxWidth:680, display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-              <span style={{fontSize:'.75rem', color:'rgba(255,255,255,.45)'}}>Live preview — updates as you type</span>
-              <button onClick={downloadPDF} style={{padding:'.45rem 1.1rem', background:'#1d4ed8', border:'none', borderRadius:7, color:'#fff', fontSize:'.78rem', fontWeight:700, cursor:'pointer', fontFamily:"'Outfit',sans-serif"}}>
-                ⬇ Download PDF
-              </button>
+          <div style={{overflowY:'auto', background:'#525659', padding:'20px', display:'flex', flexDirection:'column', alignItems:'center', gap:16}}>
+            <div style={{width:'100%', maxWidth:640, display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+              <span style={{fontSize:'.75rem', color:'rgba(255,255,255,.45)'}}>Live preview · updates as you type</span>
+              <button onClick={downloadPDF} style={{padding:'.42rem 1rem', background:'#1d4ed8', border:'none', borderRadius:7, color:'#fff', fontSize:'.78rem', fontWeight:700, cursor:'pointer', fontFamily:"'Outfit',sans-serif"}}>⬇ Download PDF</button>
             </div>
 
-            {/* A4 Letter */}
-            <div ref={letterRef} style={L.page}>
+            {/* Letter page */}
+            <div style={{width:'100%', maxWidth:640, background:'#fff', padding:'40px 48px', boxShadow:'0 4px 32px rgba(0,0,0,.3)', fontFamily:"Garamond,Georgia,'Times New Roman',serif", fontSize:'11pt', lineHeight:1.65, color:'#1a1a1a', minHeight:800}}
+              dangerouslySetInnerHTML={{__html: buildLetterHTML(false)}}
+            />
 
-              {/* Sender - right aligned */}
-              <div style={L.senderBox}>
-                <span style={L.senderName}>{v(form.name, 'Your Name')}</span>
-                <span style={L.senderSub}>{v(form.affiliation, 'Your Institution')}</span>
-                {form.address && <span style={L.senderSub}>{form.address}</span>}
-                <span style={L.senderSub}>{v(form.email, 'your@email.com')}</span>
-              </div>
-
-              {/* Date */}
-              <div style={L.date}>{form.date}</div>
-
-              {/* Recipient */}
-              <div style={L.recipient}>
-                <strong>Dear {form.editorName ? form.editorName : 'Editor-in-Chief'},</strong><br/>
-                {v(form.journal, 'Journal Name')}
-              </div>
-
-              {/* Subject */}
-              <span style={L.subject}>
-                Re: Submission — {v(form.title, '"Your Manuscript Title"')}
-              </span>
-
-              {/* Body */}
-              <div>
-                <p style={L.p}>
-                  I/We wish to submit {form.studyType === 'Review Article' ? 'a review article' : form.studyType === 'Case Report' ? 'a case report' : `an ${form.studyType.toLowerCase()}`} entitled <em>"{v(form.title, 'Manuscript Title')}"</em> for consideration by <strong>{v(form.journal, 'Journal Name')}</strong>.
-                </p>
-
-                <p style={L.p}>
-                  I/We confirm that this work is original and has not been published elsewhere, nor is it currently under consideration for publication elsewhere.
-                </p>
-
-                <p style={L.p}>
-                  In this paper, I/we {v(form.reports, 'report on [your main finding]')}. This is significant because {v(form.significance, '[explain significance]')}.
-                </p>
-
-                <p style={L.p}>
-                  We believe that this manuscript is appropriate for publication by <strong>{v(form.journal, 'this journal')}</strong> because {v(form.journalFit, '[explain journal fit]')}.
-                </p>
-
-                {(form.novelty) && <p style={L.p}>{form.novelty}</p>}
-
-                <p style={L.p}>
-                  {form.conflicts === 'yes'
-                    ? form.conflictDetails
-                      ? `The authors wish to disclose the following conflict of interest: ${form.conflictDetails}`
-                      : 'The authors have conflicts of interest to disclose, details of which will be provided separately.'
-                    : 'We have no conflicts of interest to disclose.'
-                  }
-                </p>
-
-                <p style={L.p}>
-                  Please address all correspondence to me at <strong>{v(form.email, 'your@email.com')}</strong>.
-                </p>
-
-                <p style={L.p}>Thank you for your time and consideration of this manuscript.</p>
-              </div>
-
-              {/* Closing */}
-              <div style={L.closing}>
-                <p style={{...L.p, marginBottom:0}}>Yours sincerely,</p>
-                <div style={L.sig}>
-                  <span style={L.sigName}>{v(form.name, 'Your Name')}</span>
-                  {form.affiliation && <span style={L.sigSub}>{form.affiliation}</span>}
-                  {form.email && <span style={L.sigSub}>{form.email}</span>}
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom download */}
-            <button onClick={downloadPDF} style={{padding:'.75rem 2.5rem', background:'linear-gradient(135deg,#1d4ed8,#2563eb)', border:'none', borderRadius:9, color:'#fff', fontSize:'.9rem', fontWeight:700, cursor:'pointer', fontFamily:"'Outfit',sans-serif", boxShadow:'0 4px 20px rgba(37,99,235,.4)', marginBottom:8}}>
+            <button onClick={downloadPDF} style={{padding:'.7rem 2.5rem', background:'linear-gradient(135deg,#1d4ed8,#2563eb)', border:'none', borderRadius:9, color:'#fff', fontSize:'.88rem', fontWeight:700, cursor:'pointer', fontFamily:"'Outfit',sans-serif", boxShadow:'0 4px 20px rgba(37,99,235,.4)', marginBottom:8}}>
               ⬇ Download as PDF
             </button>
           </div>
