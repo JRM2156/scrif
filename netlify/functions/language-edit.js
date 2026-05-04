@@ -27,11 +27,18 @@ exports.handler = async (event) => {
       return d.choices?.[0]?.message?.content || '[]'
     }
 
-    const needsTranslation = sourceLang && sourceLang !== 'Auto-detect' && sourceLang !== 'English'
+    const needsTranslation = sourceLang !== 'Auto-detect' && sourceLang !== 'English'
 
-    // Step 1: Translate if needed
+    // Step 1: Detect language if auto-detect, then translate if non-English
     let workingText = text
-    if (needsTranslation) {
+    if (sourceLang === 'Auto-detect') {
+      // Detect and translate in one call
+      const detectResult = await groq(
+        `You are a language expert. First detect the language of the text. If it is NOT English, translate it to academic English. If it IS English, return it as-is. Return ONLY the English text, nothing else.`,
+        text.slice(0, 6000)
+      )
+      workingText = detectResult
+    } else if (needsTranslation) {
       const translated = await groq(
         `You are a professional academic translator. Translate the following text from ${sourceLang} to English. Preserve all technical terms, numbers, and scientific notation. Return ONLY the translated text, nothing else.`,
         text.slice(0, 6000)
