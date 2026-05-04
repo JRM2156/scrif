@@ -7,7 +7,8 @@ import AuthPage       from './pages/AuthPage'
 import AuthCallback   from './pages/AuthCallback'
 import Dashboard      from './pages/Dashboard'
 import PlagiarismPage  from './pages/services/PlagiarismPage'
-import CoverLetterPage from './pages/services/CoverLetterPage'
+import CoverLetterPage  from './pages/services/CoverLetterPage'
+import LanguageEditPage  from './pages/services/LanguageEditPage'
 
 export default function App() {
   return (
@@ -24,7 +25,8 @@ export default function App() {
             {/* ── Protected routes ── */}
             <Route path="/dashboard" element={<AuthGuard><Dashboard /></AuthGuard>} />
             <Route path="/dashboard/plagiarism"   element={<AuthGuard><PlagiarismPage /></AuthGuard>} />
-            <Route path="/dashboard/cover-letter" element={<AuthGuard><CoverLetterPage /></AuthGuard>} />
+            <Route path="/dashboard/cover-letter"  element={<AuthGuard><CoverLetterPage /></AuthGuard>} />
+            <Route path="/dashboard/language"       element={<AuthGuard><LanguageEditPage /></AuthGuard>} />
 
             {/* ── Catch-all ── */}
             <Route path="*" element={<Navigate to="/login" replace />} />
