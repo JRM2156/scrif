@@ -74,34 +74,34 @@ export default function CoverLetterPage() {
         Re: Submission of Manuscript — "${p(form.title,'[Manuscript Title]')}"
       </div>
 
-      <p style="margin-bottom:12px;text-align:justify">
+      <p style="margin-bottom:12px;">
         I/We wish to submit ${studyLabel} entitled <em>"${p(form.title,'[Manuscript Title]')}"</em> for consideration by <strong>${p(form.journal,'[Journal Name]')}</strong>.
       </p>
 
-      <p style="margin-bottom:12px;text-align:justify">
+      <p style="margin-bottom:12px;">
         I/We confirm that this work is original and has not been published elsewhere, nor is it currently under consideration for publication elsewhere.
       </p>
 
-      <p style="margin-bottom:12px;text-align:justify">
+      <p style="margin-bottom:12px;">
         In this paper, I/we ${p(form.reports,'[report on / show that ______]')}. This is significant because ${p(form.significance,'[______]')}.
       </p>
 
-      <p style="margin-bottom:12px;text-align:justify">
+      <p style="margin-bottom:12px;">
         We believe that this manuscript is appropriate for publication by <strong>${p(form.journal,'[Journal Name]')}</strong> because ${p(form.journalFit,'[specific reference to the journal\'s Aims & Scope ______]')}.
       </p>
 
       ${form.novelty
-        ? `<p style="margin-bottom:12px;text-align:justify">${form.novelty}</p>`
-        : `<p style="margin-bottom:12px;text-align:justify;${grey}">[Please explain in your own words the significance and novelty of the work, the problem that is being addressed, and why the manuscript belongs in this journal.]</p>`
+        ? `<p style="margin-bottom:12px;">${form.novelty}</p>`
+        : `<p style="margin-bottom:12px;;${grey}">[Please explain in your own words the significance and novelty of the work, the problem that is being addressed, and why the manuscript belongs in this journal.]</p>`
       }
 
-      <p style="margin-bottom:12px;text-align:justify">${conflictText}</p>
+      <p style="margin-bottom:12px;">${conflictText}</p>
 
-      <p style="margin-bottom:12px;text-align:justify">
+      <p style="margin-bottom:12px;">
         Please address all correspondence concerning this manuscript to me at <strong>${p(form.email,'[email address]')}</strong>.
       </p>
 
-      <p style="margin-bottom:20px;text-align:justify">Thank you for your consideration of this manuscript.</p>
+      <p style="margin-bottom:20px;">Thank you for your consideration of this manuscript.</p>
 
       <div>
         <p>Yours sincerely,</p>
@@ -145,7 +145,7 @@ export default function CoverLetterPage() {
       @page{size:A4 portrait;margin:20mm 22mm}
       html,body{width:100%;margin:0;padding:0;background:#fff}
       body{font-family:Garamond,Georgia,'Times New Roman',serif;font-size:11pt;line-height:1.65;color:#1a1a1a}
-      p{margin-bottom:11pt;text-align:justify}
+      p{margin-bottom:11pt;}
     </style></head><body>
     ${buildLetterHTML(true)}
     <script>window.onload=function(){window.print()}<\/script>
@@ -218,13 +218,13 @@ export default function CoverLetterPage() {
 
           {/* RIGHT - PREVIEW */}
           <div style={{overflowY:'auto', background:'#525659', padding:'20px', display:'flex', flexDirection:'column', alignItems:'center', gap:16}}>
-            <div style={{width:'100%', maxWidth:640, display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+            <div style={{width:600, display:'flex', justifyContent:'space-between', alignItems:'center'}}>
               <span style={{fontSize:'.75rem', color:'rgba(255,255,255,.45)'}}>Live preview · updates as you type</span>
               <button onClick={downloadPDF} style={{padding:'.42rem 1rem', background:'#1d4ed8', border:'none', borderRadius:7, color:'#fff', fontSize:'.78rem', fontWeight:700, cursor:'pointer', fontFamily:"'Outfit',sans-serif"}}>⬇ Download PDF</button>
             </div>
 
             {/* Letter page */}
-            <div style={{width:'100%', maxWidth:640, background:'#fff', padding:'40px 48px', boxShadow:'0 4px 32px rgba(0,0,0,.3)', fontFamily:"Garamond,Georgia,'Times New Roman',serif", fontSize:'11pt', lineHeight:1.65, color:'#1a1a1a', minHeight:800}}
+            <div style={{width:600, flexShrink:0, background:'#fff', padding:'40px 48px', boxShadow:'0 4px 32px rgba(0,0,0,.3)', fontFamily:"Garamond,Georgia,'Times New Roman',serif", fontSize:'10.5pt', lineHeight:1.6, color:'#1a1a1a', overflow:'hidden'}}
               dangerouslySetInnerHTML={{__html: buildLetterHTML(false)}}
             />
 
