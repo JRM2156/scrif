@@ -9,6 +9,7 @@ import Dashboard      from './pages/Dashboard'
 import PlagiarismPage  from './pages/services/PlagiarismPage'
 import CoverLetterPage  from './pages/services/CoverLetterPage'
 import LanguageEditPage  from './pages/services/LanguageEditPage'
+import FormattingPage    from './pages/services/FormattingPage'
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
             <Route path="/dashboard/plagiarism"   element={<AuthGuard><PlagiarismPage /></AuthGuard>} />
             <Route path="/dashboard/cover-letter"  element={<AuthGuard><CoverLetterPage /></AuthGuard>} />
             <Route path="/dashboard/language"       element={<AuthGuard><LanguageEditPage /></AuthGuard>} />
+            <Route path="/dashboard/formatting"     element={<AuthGuard><FormattingPage /></AuthGuard>} />
 
             {/* ── Catch-all ── */}
             <Route path="*" element={<Navigate to="/login" replace />} />
