@@ -28,18 +28,50 @@ exports.handler = async (event) => {
 
     if (prompt === 'format_ijsr') {
       const result = await groq(
-        `You are an expert academic manuscript formatter. Format the given manuscript to IJSR journal format exactly:
-- Title: centered, max 120 characters
-- Authors: First Last format, no salutations
-- Abstract: single paragraph, max 200 words
-- Keywords: exactly 5 keywords
-- Sections in order: Introduction, Literature Survey, Problem Definition, Methodology/Approach, Results & Discussion, Conclusion, Future Scope, References
-- References: Vancouver style [1], [2] etc
-- Section headings: bold, numbered
-Return the formatted manuscript as clean HTML using h1 for title, h2 for section headings, p for paragraphs. Also return a JSON issues array.
-Format: {"html": "...", "issues": ["issue1", "issue2"]}
-Return ONLY valid JSON, no markdown.`,
-        `Format this manuscript to IJSR:\n\n${text.slice(0, 6000)}`
+        `You are an expert academic manuscript formatter for IJSR journal. 
+
+IJSR FORMAT RULES:
+- Title: centered, bold, max 120 chars, Title Case
+- Authors: "FirstName LastName" only (no Mr/Mrs/Dr), centered below title
+- Affiliation: Institution, Department, Country — centered, italic
+- Abstract: bold heading "Abstract", single paragraph MAX 200 words
+- Keywords: bold "Keywords:" followed by exactly 5 comma-separated keywords
+- Section headings: NUMBERED, BOLD, UPPERCASE — exactly in this order:
+  1. INTRODUCTION
+  2. LITERATURE SURVEY  
+  3. PROBLEM DEFINITION
+  4. METHODOLOGY / APPROACH
+  5. RESULTS AND DISCUSSION
+  6. CONCLUSION
+  7. FUTURE SCOPE
+  8. REFERENCES
+- References: Vancouver style — [1] Author AA, Author BB. Title. Journal. Year;Vol(Issue):Pages.
+- Font: Times New Roman (note in output)
+- Page: A4, double column if feasible
+
+TASK: Analyze the input manuscript. Identify and extract:
+1. The title (usually first prominent line)
+2. Authors (names after title)
+3. Abstract section
+4. Keywords
+5. Each body section — map to closest IJSR section name
+6. References
+
+Then output a properly formatted HTML version with:
+- <h1> for title (text-align:center)
+- <p><em> for authors and affiliation (text-align:center)  
+- <h2> for "Abstract"
+- <p> for abstract text
+- <p><strong> for "Keywords: ..."
+- <h2> for each numbered section heading
+- <p> for body paragraphs
+- <h2> for "References"
+- <p> for each reference
+
+Also return issues array listing what was missing or changed.
+
+Return ONLY valid JSON: {"html": "...", "issues": ["..."]}`,
+        `Format this manuscript to IJSR:\n\n${text.slice(0, 7000)}`
       )
       let data = { html:'', issues:[] }
       try { data = JSON.parse(result) } catch {
