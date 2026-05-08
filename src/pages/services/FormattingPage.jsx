@@ -172,6 +172,12 @@ export default function FormattingPage() {
 
   /* Load mammoth for DOCX */
   useEffect(() => {
+    if (!document.getElementById('html-docx')) {
+  const s = document.createElement('script')
+  s.id = 'html-docx'
+  s.src = 'https://cdn.jsdelivr.net/npm/html-docx-js/dist/html-docx.js'
+  document.head.appendChild(s)
+}
     if (!document.getElementById('mammoth')) {
       const s = document.createElement('script')
       s.id = 'mammoth'
@@ -241,6 +247,15 @@ export default function FormattingPage() {
     } catch(e) { showToast({title:'Error',message:e.message,type:'error'}) }
     finally { setLoad('humanise',false) }
   }
+  function downloadDOCX() {
+  if (!quillInstance.current) return
+  const html = `<!DOCTYPE html><html><head><style>body{font-family:'Times New Roman';font-size:11pt}h1{text-align:center;font-size:14pt}h2{font-size:11pt;text-transform:uppercase;font-weight:bold}</style></head><body>${quillInstance.current.root.innerHTML}</body></html>`
+  const blob = window.htmlDocx.asBlob(html)
+  const a = document.createElement('a')
+  a.href = URL.createObjectURL(blob)
+  a.download = 'manuscript_formatted.docx'
+  a.click()
+}
 
   function download(type) {
     if (!quillInstance.current) return
@@ -302,6 +317,7 @@ export default function FormattingPage() {
             <div style={{height:1,background:'rgba(37,99,235,.12)',margin:'.4rem 0'}}/>
             <div style={{fontSize:'.62rem',fontWeight:700,textTransform:'uppercase',letterSpacing:'.1em',color:'rgba(255,255,255,.25)',marginBottom:'.2rem',padding:'0 2px'}}>⬇ Download</div>
             <ToolBtn icon="📝" label="Download TXT" onClick={()=>download('txt')} color='#93c5fd' />
+                <ToolBtn icon="📄" label="Download DOCX" onClick={downloadDOCX} color='#34d399' />
             <ToolBtn icon="🌐" label="Download HTML" onClick={()=>download('html')} color='#93c5fd' />
 
             {/* Issues list */}
